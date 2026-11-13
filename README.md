@@ -105,13 +105,11 @@ aws cloudwatch describe-alarms --alarm-names "$(terraform output -raw lambda_err
 ```
 
 ### My verification run
+- Date and region: Nov 13, 2026, us-east-1
+- `terraform apply` result: 17 resources created. First apply created 16/17; the $default stage failed because the access-log format used `$context.http.*` variables, which API Gateway rejected. Fixed the format to `$context.httpMethod`, `$context.path`, `$context.status` and re-applied; stage created, 1 added, 0 changed, 0 destroyed.
+- Smoke test / curl result: pytest 11 passed. Live: POST created an item (201), GET list showed count 1, GET one returned the item, DELETE returned deleted true, GET one after delete returned 404 Item not found, GET list returned count 0. POST via curl.exe first failed with "Request body must be valid JSON" because PowerShell stripped the quotes; used Invoke-RestMethod instead.
+- CloudWatch log line seen: not captured before destroy.
 
-<!-- FILL IN AFTER YOUR DEPLOY: paste the commands you ran and what you actually saw, with IDs/URLs redacted if you publish this publicly. Do not invent this section. -->
-
-- Date and region:
-- `terraform apply` result:
-- Smoke test / curl result:
-- CloudWatch log line seen:
 
 ## Destroy
 
@@ -131,23 +129,16 @@ Confirm the destroy completes, then check Cost Explorer. Do not leave resources 
 - The Lambda Errors CloudWatch alarm fires if Errors > 0 in 5 minutes. No SNS action is wired up in this lab; that is a deliberate scope limit, noted in `terraform/alarms.tf`.
 
 ## Cost notes
+- Observed cost for my test run: [check Billing, Budgets or Cost Explorer, and write what it shows]
+- How I checked (Cost Explorer / billing alarm): [Budgets page for Lab-Monthly-10-USD / Cost Explorer; spend data can lag up to 24 hours]
 
-<!-- FILL IN AFTER YOUR DEPLOY: check Cost Explorer and record what your test run actually cost. -->
-
-- Expected: very low for a short lab run. DynamoDB is `PAY_PER_REQUEST`, Lambda is 128 MB with a 10 second timeout, and logs are kept for 7 days.
-- Pricing changes, so do not copy a number from a tutorial. Record your own observed cost here after you deploy and destroy.
-- Observed cost for my test run:
-- How I checked (Cost Explorer / billing alarm):
 
 ## Trade-offs and what I learned
-
-<!-- FILL IN HONESTLY AFTER YOU BUILD AND DEPLOY THIS. One real debugging story beats a perfect-looking list. -->
-
-- Why HTTP API instead of REST API:
-- Why `Scan` is acceptable for this small lab list endpoint, and what would replace it at scale:
-- Why local Terraform state is acceptable here, and what Project 2 changes:
-- What broke during my build/deploy, and how I debugged it:
-- What I would change next:
+- Why HTTP API instead of REST API: cheaper and simpler; this lab needs no usage plans, API keys, or WAF features that REST adds.
+- Why `Scan` is acceptable for this small lab list endpoint, and what would replace it at scale: the table holds a handful of items; at scale I would Query on a key or GSI and paginate instead of scanning.
+- Why local Terraform state is acceptable here, and what Project 2 changes: single user, single environment, short-lived lab. Project 2 moves state to an S3 backend with DynamoDB locking.
+- What broke during my build/deploy, and how I debugged it: (1) access-log variables rejected by API Gateway, checked the AWS error and docs, fixed the three variable names; (2) PowerShell mangled JSON passed to curl.exe, switched the POST to Invoke-RestMethod; (3) aws.cmd launcher picked the wrong Python, a known awscli bug, bypassed with `py -3.12` and a session function; (4) first re-apply failed identically because the file edit hadn't been saved, patched via PowerShell and verified the file contents before re-applying. Also used AWS CLI v1 (pip) because the v2 MSI install was blocked by organization policy on this laptop.
+- What I would change next: remote state with locking, an SNS action on the Errors alarm, auth on the API, and pagination on the list endpoint.
 
 ## Repo layout
 
