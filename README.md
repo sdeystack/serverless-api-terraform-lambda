@@ -129,8 +129,8 @@ Confirm the destroy completes, then check Cost Explorer. Do not leave resources 
 - The Lambda Errors CloudWatch alarm fires if Errors > 0 in 5 minutes. No SNS action is wired up in this lab; that is a deliberate scope limit, noted in `terraform/alarms.tf`.
 
 ## Cost notes
-- Observed cost for my test run: $10.00 as of Nov 13, 2026 (Cost Explorer; spend data can lag up to 24 hours)
-- How I checked Cost Explorer / Budgets page for Lab-Monthly-10-USD
+- Observed cost for my test run: $X.XX as of Nov 13, 2026 (Cost Explorer; spend data can lag up to 24 hours)
+- How I checked: Cost Explorer / Budgets page for Lab-Monthly-10-USD
 
 
 ## Trade-offs and what I learned
