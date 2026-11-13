@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Terraform: never commit state or variables with secrets. Commit
+# .terraform.lock.hcl after `terraform init` so others get the same providers.
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!example.tfvars
+terraform/lambda.zip
+terraform/.build/
+
+# Local AWS / editor files
+.env
+.aws/
+.vscode/
+.idea/
+.DS_Store
